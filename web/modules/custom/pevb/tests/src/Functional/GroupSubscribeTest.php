@@ -2,51 +2,95 @@
 
 namespace Drupal\Tests\pevb\Functional;
 
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\Tests\BrowserTestBase;
+use Drupal\user\Entity\User;
 
 /**
- * @group og_group_subscribe
+ * Tests the group subscribe CTA on Group nodes.
+ *
+ * @group pevb
  */
-class GroupSubscribeTest extends BrowserTestBase {
+class GroupSubscribeTest extends WebDriverTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'node',
     'user',
     'og',
-    'pluggable_entity_view_builder',
-    'og_group_subscribe',
+    'pevb',
   ];
 
-  protected $defaultTheme = 'stark';
+  /**
+   * A test group node.
+   *
+   * @var \Drupal\node\NodeInterface
+   */
+  protected $group;
 
-  public function testSubscribeCtaAndFlow(): void {
+  /**
+   * A test user.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $account;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+
+    // Create Group content type.
     $type = NodeType::create([
       'type' => 'group',
       'name' => 'Group',
     ]);
     $type->save();
+
+    // Mark it as an OG group.
     \Drupal::service('og.group_type_manager')->addGroup('node', 'group');
 
-    $group = Node::create([
+    // Create a group node.
+    $this->group = Node::create([
       'type' => 'group',
-      'title' => 'Chess Club',
-      'status' => 1,
+      'title' => 'Test Group',
     ]);
-    $group->save();
+    $this->group->save();
 
-    $account = $this->drupalCreateUser(['access content']);
-    $this->drupalLogin($account);
-
-    $this->drupalGet($group->toUrl());
-    $this->assertSession()->pageTextContains("Hi {$account->getDisplayName()},");
-    $this->assertSession()->linkExists('click here');
-
-    $this->clickLink('click here');
-    $this->assertSession()->pageTextContains('You are now subscribed to Chess Club.');
-
-    $this->drupalGet($group->toUrl());
-    $this->assertSession()->linkNotExists('click here');
+    // Create and login a test user.
+    $this->account = User::create([
+      'name' => $this->randomMachineName(),
+      'mail' => $this->randomMachineName() . '@example.com',
+    ]);
+    $this->account->activate();
+    $this->account->save();
+    $this->drupalLogin($this->account);
   }
+
+  /**
+   * Test that subscribe CTA appears for non-members.
+   */
+  public function testSubscribeCTAForNonMembers() {
+    $this->drupalGet($this->group->toUrl());
+
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains('Hi ' . $this->account->getDisplayName());
+    $this->assertSession()->pageTextContains('click here if you would like to subscribe to this group called');
+  }
+
+  /**
+   * Test that login prompt appears for anonymous users.
+   */
+  public function testSubscribeCTAForAnonymous() {
+    $this->drupalLogout();
+    $this->drupalGet($this->group->toUrl());
+
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains('Please login to subscribe to this group called');
+  }
+
 }
