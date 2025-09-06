@@ -49,5 +49,19 @@ function server_style_guide_theme() {
     ],
   ];
 
+ return [
+    'person_card' => [
+      'variables' => [
+        'image' => NULL,
+        'name' => NULL,
+        'role' => NULL,
+        'badge' => NULL,
+        'email' => NULL,
+        'phone' => NULL,
+      ],
+      'template' => 'components/person-card',
+    ],
+  ];
+
   return $info;
 }
