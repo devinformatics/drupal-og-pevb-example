@@ -7,3 +7,13 @@ server_style_guide.style_guide:
     _permission: 'access content'
   options:
     no_cache: 'TRUE'
+
+
+server_general_styleguide.person_card:
+  path: '/style-guide/person-card'
+  defaults:
+    _controller: '\Drupal\server_style_guide\Controller\StyleGuideController::personCard'
+    _title: 'Person Card'
+  requirements:
+    _permission: 'access content'
+

@@ -936,4 +936,60 @@ class StyleGuideController extends ControllerBase {
     );
   }
 
+/**
+   * Person card demo page.
+   */
+  public function personCard() {
+  // Single card - center with constrained width (matches Figma).
+  $single = [
+    '#type' => 'container',
+    '#attributes' => ['class' => ['py-12', 'bg-gray-50', 'mb-8']],
+    'inner' => [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['max-w-sm', 'mx-auto']],
+      'card' => [
+        '#theme' => 'person_card',
+        '#image' => 'https://randomuser.me/api/portraits/women/44.jpg',
+        '#name' => 'Jane Cooper',
+        '#role' => 'Paradigm Representative',
+        '#badge' => 'Admin',
+        '#email' => 'jane@example.com',
+        '#phone' => '+1234567890',
+      ],
+    ],
+  ];
+
+  // Grid of 10 cards (responsive).
+  $cards = [];
+  for ($i = 1; $i <= 10; $i++) {
+    $cards[] = [
+      '#theme' => 'person_card',
+      '#image' => 'https://randomuser.me/api/portraits/women/' . (10 + $i) . '.jpg',
+      '#name' => 'Person ' . $i,
+      '#role' => 'Team Member',
+      '#badge' => ($i % 3 === 0) ? 'Admin' : NULL,
+      '#email' => "person{$i}@example.com",
+      '#phone' => '+1234567890',
+    ];
+  }
+
+  $grid = [
+    '#type' => 'container',
+    '#attributes' => [
+      'class' => ['max-w-6xl', 'mx-auto', 'py-8'],
+    ],
+    'inner' => [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3', 'gap-6', 'items-start']],
+      'cards' => $cards,
+    ],
+  ];
+
+  return [
+    'single' => $single,
+    'grid' => $grid,
+  ];
+}
+
+
 }
